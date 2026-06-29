@@ -1,9 +1,3 @@
-/* ============================================
-   ultraviolet. — interactive grid background
-   A dim grid on black that brightens near the
-   cursor, like light catching dust in a dark room.
-   ============================================ */
-
 (function () {
   const canvas = document.getElementById('grid');
   const ctx = canvas.getContext('2d');
@@ -116,8 +110,6 @@
   }
 
   function drawLine(x1, y1, x2, y2, vertical) {
-    // Segment the line so we can brighten the portion near the cursor
-    // without per-pixel cost: sample distance at line's closest approach.
     const closest = vertical
       ? clamp(eased.y, y1, y2)
       : clamp(eased.x, x1, x2);
