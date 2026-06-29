@@ -105,7 +105,15 @@ main, header, footer {
   font-family: var(--font-display);
   font-size: 1.15rem;
   letter-spacing: 0.01em;
-  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav__glyph {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 .nav__links {
@@ -172,7 +180,6 @@ main, header, footer {
 
 .hero__mark {
   font-family: var(--font-display);
-  font-style: italic;
   font-weight: 400;
   font-size: clamp(3.2rem, 12vw, 8rem);
   line-height: 1;
@@ -200,13 +207,18 @@ main, header, footer {
   .hero__scroll { animation: none; }
 }
 
-.hero__glyph {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  transform: rotate(135deg);
+.hero__chevron {
+  width: 22px;
+  height: 22px;
+  color: var(--text-dim);
   opacity: 0.7;
-  filter: drop-shadow(0 0 12px rgba(203, 79, 255, 0.35));
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.hero__scroll:hover .hero__chevron,
+.hero__scroll:focus-visible .hero__chevron {
+  opacity: 1;
+  color: var(--violet);
 }
 
 @keyframes bob {
@@ -288,7 +300,6 @@ main > section {
 
 .next-mark {
   font-family: var(--font-display);
-  font-style: italic;
   font-size: 2.5rem;
   color: var(--text-faint);
 }
@@ -302,7 +313,6 @@ main > section {
 
 .game-card__top h2 {
   font-family: var(--font-display);
-  font-style: italic;
   font-weight: 400;
   font-size: 1.7rem;
   margin: 0;
@@ -390,7 +400,6 @@ main > section {
 
 .footer__mark {
   font-family: var(--font-display);
-  font-style: italic;
   font-size: 1rem;
   color: var(--text-dim);
 }
