@@ -1,3 +1,10 @@
+/* ============================================
+   ultraviolet. — interactive constellation background
+   Nodes drift slowly in straight lines, bouncing off
+   the edges. Lines connect nodes that are close together,
+   and the cursor pushes nearby nodes aside.
+   ============================================ */
+
 (function () {
   const canvas = document.getElementById('grid');
   const ctx = canvas.getContext('2d');
@@ -7,227 +14,156 @@
   ).matches;
 
   // --- config ---
-  const CELL         = 72;    // resting grid spacing
-  const PUSH_RADIUS  = 90;    // how far cursor pushes (roughly 1-2 nodes)
-  const PUSH_FORCE   = 55;    // how far nodes get displaced at center
-  const SPRING       = 0.032; // how fast they drift back (low = floaty)
-  const DAMPING      = 0.78;  // velocity damping (lower = more jelly)
-  const LINE_ALPHA   = 0.13;  // base line opacity
-  const DOT_RADIUS   = 2;     // resting node dot size
-  const DRIFT_SPEED  = 0.012;  // how strongly nodes steer toward their wander target
-  const DRIFT_AMOUNT = 22;     // how far each new wander target can be from origin
-  const VIOLET       = 'rgba(203, 79, 255,';
-  const WHITE        = 'rgba(246, 246, 246,';
+  // NODE_COUNT: how many points make up the constellation.
+  // Default is 90. Raise it for a denser field, lower it for a
+  // sparser one — more nodes costs more per-frame computation
+  // since connections are checked between every pair of nodes.
+  const NODE_COUNT   = 90;
+  const LINK_DIST    = 140;   // max distance two nodes can be apart and still draw a line
+  const PUSH_RADIUS  = 130;   // how far the cursor reaches to push nodes
+  const PUSH_FORCE   = 2.2;   // how hard the cursor pushes
+  const DAMPING      = 0.94;  // how quickly the cursor-push velocity settles back down
+  const DRIFT_SPEED  = 0.12;  // constant ambient drift speed (px/frame)
 
   let w, h, dpr;
   let nodes = [];
-  let cols, rows;
   let pointer = { x: -9999, y: -9999 };
   let rafId;
-  let t = 0;
-
-  // --- node factory ---
-  function makeNode(ox, oy) {
-    return {
-      ox, oy,       // origin (resting position, used for line stretch calc)
-      x: ox, y: oy, // current position
-      vx: 0, vy: 0, // velocity
-      // each node walks toward its own ever-changing wander target
-      wanderX: ox,
-      wanderY: oy,
-      wanderTimer: Math.random() * 120 // stagger when each node first picks a new target
-    };
-  }
-
-  function buildGrid() {
-    nodes = [];
-    cols = Math.ceil(w / CELL) + 2;
-    rows = Math.ceil(h / CELL) + 2;
-    const offX = (w % CELL) / 2 - CELL;
-    const offY = (h % CELL) / 2 - CELL;
-    for (let r = 0; r <= rows; r++) {
-      for (let c = 0; c <= cols; c++) {
-        nodes.push(makeNode(offX + c * CELL, offY + r * CELL));
-      }
-    }
-  }
-
-  function idx(c, r) {
-    return r * (cols + 1) + c;
-  }
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = window.innerWidth;
     h = window.innerHeight;
-    canvas.width  = w * dpr;
+    canvas.width = w * dpr;
     canvas.height = h * dpr;
-    canvas.style.width  = w + 'px';
+    canvas.style.width = w + 'px';
     canvas.style.height = h + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    buildGrid();
+    buildNodes();
   }
 
-  // --- input ---
-  window.addEventListener('mousemove', e => {
+  function buildNodes() {
+    nodes = [];
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      nodes.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        dirX: Math.cos(angle),
+        dirY: Math.sin(angle),
+        vx: 0,
+        vy: 0
+      });
+    }
+  }
+
+  function onMove(e) {
     pointer.x = e.clientX;
     pointer.y = e.clientY;
-  }, { passive: true });
+  }
 
-  window.addEventListener('touchmove', e => {
-    if (e.touches[0]) {
+  function onTouch(e) {
+    if (e.touches && e.touches[0]) {
       pointer.x = e.touches[0].clientX;
       pointer.y = e.touches[0].clientY;
     }
-  }, { passive: true });
+  }
 
-  window.addEventListener('mouseleave', () => {
-    pointer.x = -9999;
-    pointer.y = -9999;
-  });
-
-  // --- physics ---
   function update() {
-    t += 1;
+    for (const n of nodes) {
+      // constant ambient drift along a fixed heading, bouncing off edges
+      n.x += n.dirX * DRIFT_SPEED;
+      n.y += n.dirY * DRIFT_SPEED;
 
-    for (let i = 0; i < nodes.length; i++) {
-      const n = nodes[i];
+      if (n.x < 0) { n.x = 0; n.dirX *= -1; }
+      else if (n.x > w) { n.x = w; n.dirX *= -1; }
+      if (n.y < 0) { n.y = 0; n.dirY *= -1; }
+      else if (n.y > h) { n.y = h; n.dirY *= -1; }
 
-      // periodically pick a new nearby wander target so the node
-      // actually travels over time instead of circling one spot
-      n.wanderTimer -= 1;
-      if (n.wanderTimer <= 0) {
-        const angle = Math.random() * Math.PI * 2;
-        const dist = DRIFT_AMOUNT * (0.5 + Math.random() * 0.5);
-        n.wanderX = n.ox + Math.cos(angle) * dist;
-        n.wanderY = n.oy + Math.sin(angle) * dist;
-        n.wanderTimer = 90 + Math.random() * 120; // next target in ~1.5-3.5s at 60fps
-      }
-
-      // push from cursor
+      // cursor push — a temporary velocity layered on top of the drift
       const dx = n.x - pointer.x;
       const dy = n.y - pointer.y;
-      const dist2 = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist2 < PUSH_RADIUS && dist2 > 0.01) {
-        const ft = 1 - dist2 / PUSH_RADIUS;
-        const force = ft * ft * PUSH_FORCE;
-        n.vx += (dx / dist2) * force * 0.18;
-        n.vy += (dy / dist2) * force * 0.18;
+      const dist = Math.hypot(dx, dy);
+      if (dist < PUSH_RADIUS && dist > 0.01) {
+        const t = 1 - dist / PUSH_RADIUS;
+        n.vx += (dx / dist) * t * t * PUSH_FORCE;
+        n.vy += (dy / dist) * t * t * PUSH_FORCE;
       }
-
-      // gently steer toward the current wander target (ambient motion)
-      n.vx += (n.wanderX - n.x) * DRIFT_SPEED;
-      n.vy += (n.wanderY - n.y) * DRIFT_SPEED;
-
-      // and a much weaker pull back toward true origin, so nodes
-      // don't wander off forever and the grid shape stays recognizable
-      n.vx += (n.ox - n.x) * SPRING;
-      n.vy += (n.oy - n.y) * SPRING;
-
-      // damping
       n.vx *= DAMPING;
       n.vy *= DAMPING;
-
-      // integrate
       n.x += n.vx;
       n.y += n.vy;
     }
   }
 
-  // --- draw ---
   function draw() {
     update();
 
-    ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, w, h);
 
-    // subtle violet glow near cursor
-    if (pointer.x > -1000) {
-      const g = ctx.createRadialGradient(
-        pointer.x, pointer.y, 0,
-        pointer.x, pointer.y, PUSH_RADIUS * 2.2
-      );
-      g.addColorStop(0, 'rgba(203,79,255,0.055)');
-      g.addColorStop(1, 'rgba(203,79,255,0)');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, w, h);
-    }
-
-    ctx.lineWidth = 1;
-
-    // horizontal lines — connect node (c,r) to (c+1,r)
-    for (let r = 0; r <= rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const a = nodes[idx(c, r)];
-        const b = nodes[idx(c + 1, r)];
-        if (!a || !b) continue;
-        const stretch = Math.hypot(a.x - b.x, a.y - b.y) / CELL;
-        const alpha = LINE_ALPHA + Math.min((stretch - 1) * 0.35, 0.5);
-        ctx.strokeStyle = WHITE + Math.max(0, alpha) + ')';
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
-      }
-    }
-
-    // vertical lines — connect node (c,r) to (c,r+1)
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c <= cols; c++) {
-        const a = nodes[idx(c, r)];
-        const b = nodes[idx(c, r + 1)];
-        if (!a || !b) continue;
-        const stretch = Math.hypot(a.x - b.x, a.y - b.y) / CELL;
-        const alpha = LINE_ALPHA + Math.min((stretch - 1) * 0.35, 0.5);
-        ctx.strokeStyle = WHITE + Math.max(0, alpha) + ')';
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
-      }
-    }
-
-    // nodes — glow violet when displaced
+    // connecting lines between nearby nodes
     for (let i = 0; i < nodes.length; i++) {
-      const n = nodes[i];
-      const disp = Math.hypot(n.x - n.ox, n.y - n.oy);
-      const t = Math.min(disp / 30, 1);
-      const color = t > 0.3 ? VIOLET : WHITE;
-      const alpha = 0.25 + t * 0.65;
-      const r = DOT_RADIUS + t * 1.8;
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < LINK_DIST) {
+          const t = 1 - d / LINK_DIST;
+          const nearCursor = Math.min(
+            Math.hypot(a.x - pointer.x, a.y - pointer.y),
+            Math.hypot(b.x - pointer.x, b.y - pointer.y)
+          );
+          const glow = nearCursor < PUSH_RADIUS ? (1 - nearCursor / PUSH_RADIUS) : 0;
+          const alpha = t * 0.18 + glow * 0.35;
+          ctx.strokeStyle = glow > 0.4
+            ? `rgba(203,79,255,${alpha})`
+            : `rgba(246,246,246,${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
 
+    // nodes, glowing violet when near the cursor
+    for (const n of nodes) {
+      const dist = Math.hypot(n.x - pointer.x, n.y - pointer.y);
+      const near = dist < PUSH_RADIUS ? (1 - dist / PUSH_RADIUS) : 0;
       ctx.beginPath();
-      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = color + alpha + ')';
+      ctx.arc(n.x, n.y, 1.6 + near * 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = near > 0.3
+        ? `rgba(203,79,255,${0.5 + near * 0.5})`
+        : `rgba(246,246,246,0.6)`;
       ctx.fill();
     }
 
     rafId = requestAnimationFrame(draw);
   }
 
-  // --- reduced motion fallback ---
   function drawStatic() {
+    // Reduced-motion fallback: draw one static frame, no animation loop.
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = WHITE + LINE_ALPHA + ')';
-    ctx.lineWidth = 1;
-    for (let r = 0; r <= rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const a = nodes[idx(c, r)];
-        const b = nodes[idx(c + 1, r)];
-        if (!a || !b) continue;
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < LINK_DIST) {
+          const alpha = (1 - d / LINK_DIST) * 0.18;
+          ctx.strokeStyle = `rgba(246,246,246,${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
       }
     }
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c <= cols; c++) {
-        const a = nodes[idx(c, r)];
-        const b = nodes[idx(c, r + 1)];
-        if (!a || !b) continue;
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-      }
+    for (const n of nodes) {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 1.6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(246,246,246,0.6)';
+      ctx.fill();
     }
   }
 
@@ -235,6 +171,8 @@
     resize();
     if (prefersReducedMotion) drawStatic();
   });
+  window.addEventListener('mousemove', onMove, { passive: true });
+  window.addEventListener('touchmove', onTouch, { passive: true });
 
   resize();
 
