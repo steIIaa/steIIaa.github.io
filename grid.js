@@ -18,7 +18,7 @@
   // Default is 90. Raise it for a denser field, lower it for a
   // sparser one — more nodes costs more per-frame computation
   // since connections are checked between every pair of nodes.
-  const NODE_COUNT   = 300;
+  const NODE_COUNT   = 1000;
   const LINK_DIST    = 140;   // max distance two nodes can be apart and still draw a line
   const PUSH_RADIUS  = 90;   // how far the cursor reaches to push nodes
   const PUSH_FORCE   = 1.5;   // how hard the cursor pushes
