@@ -18,12 +18,11 @@
   // Default is 90. Raise it for a denser field, lower it for a
   // sparser one — more nodes costs more per-frame computation
   // since connections are checked between every pair of nodes.
-  const NODE_COUNT   = 300;
+  const NODE_COUNT   = 90;
   const LINK_DIST    = 140;   // max distance two nodes can be apart and still draw a line
-  const PUSH_RADIUS  = 90;   // how far the cursor reaches to push nodes
-  const PUSH_FORCE   = 2;   // how hard the cursor pushes
-  const DAMPING      = 0.94;  // how quickly the cursor-push velocity settles back down
-  const DRIFT_SPEED  = 0.12;  // constant ambient drift speed (px/frame)
+  const PUSH_RADIUS  = 130;   // how far the cursor reaches to redirect nodes
+  const TURN_STRENGTH = 0.06; // how sharply nodes turn away from the cursor (0-1)
+  const DRIFT_SPEED  = 0.12;  // constant speed every node always travels at — never changes
 
   let w, h, dpr;
   let nodes = [];
@@ -50,9 +49,7 @@
         x: Math.random() * w,
         y: Math.random() * h,
         dirX: Math.cos(angle),
-        dirY: Math.sin(angle),
-        vx: 0,
-        vy: 0
+        dirY: Math.sin(angle)
       });
     }
   }
@@ -71,7 +68,24 @@
 
   function update() {
     for (const n of nodes) {
-      // constant ambient drift along a fixed heading, bouncing off edges
+      // steer heading away from the cursor when nearby — direction
+      // changes, but speed never does
+      const dx = n.x - pointer.x;
+      const dy = n.y - pointer.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < PUSH_RADIUS && dist > 0.01) {
+        const t = 1 - dist / PUSH_RADIUS;
+        const awayX = dx / dist;
+        const awayY = dy / dist;
+        n.dirX += awayX * t * t * TURN_STRENGTH;
+        n.dirY += awayY * t * t * TURN_STRENGTH;
+        // re-normalize so speed stays exactly DRIFT_SPEED, only heading changes
+        const len = Math.hypot(n.dirX, n.dirY) || 1;
+        n.dirX /= len;
+        n.dirY /= len;
+      }
+
+      // always move at full constant speed along the current heading
       n.x += n.dirX * DRIFT_SPEED;
       n.y += n.dirY * DRIFT_SPEED;
 
@@ -79,20 +93,6 @@
       else if (n.x > w) { n.x = w; n.dirX *= -1; }
       if (n.y < 0) { n.y = 0; n.dirY *= -1; }
       else if (n.y > h) { n.y = h; n.dirY *= -1; }
-
-      // cursor push — a temporary velocity layered on top of the drift
-      const dx = n.x - pointer.x;
-      const dy = n.y - pointer.y;
-      const dist = Math.hypot(dx, dy);
-      if (dist < PUSH_RADIUS && dist > 0.01) {
-        const t = 1 - dist / PUSH_RADIUS;
-        n.vx += (dx / dist) * t * t * PUSH_FORCE;
-        n.vy += (dy / dist) * t * t * PUSH_FORCE;
-      }
-      n.vx *= DAMPING;
-      n.vy *= DAMPING;
-      n.x += n.vx;
-      n.y += n.vy;
     }
   }
 
