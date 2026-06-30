@@ -9,9 +9,9 @@
   // --- config ---
   const CELL         = 72;    // resting grid spacing
   const PUSH_RADIUS  = 200;    // how far cursor pushes (roughly 1-2 nodes)
-  const PUSH_FORCE   = 65;    // how far nodes get displaced at center
+  const PUSH_FORCE   = 67;    // how far nodes get displaced at center
   const SPRING       = 0.032; // how fast they drift back (low = floaty)
-  const DAMPING      = 0.80;  // velocity damping (lower = more jelly)
+  const DAMPING      = 0.78;  // velocity damping (lower = more jelly)
   const LINE_ALPHA   = 0.13;  // base line opacity
   const DOT_RADIUS   = 2;     // resting node dot size
   const DRIFT_SPEED  = 0.012;  // how strongly nodes steer toward their wander target
