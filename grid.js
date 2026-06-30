@@ -14,8 +14,8 @@
   const DAMPING      = 0.78;  // velocity damping (lower = more jelly)
   const LINE_ALPHA   = 0.13;  // base line opacity
   const DOT_RADIUS   = 2;     // resting node dot size
-  const DRIFT_SPEED  = 0.0006; // how fast the ambient wander cycles (lower = slower)
-  const DRIFT_AMOUNT = 7;      // max px of ambient wander from origin
+  const DRIFT_SPEED  = 0.005; // how fast the ambient wander cycles (lower = slower)
+  const DRIFT_AMOUNT = 50;      // max px of ambient wander from origin
   const VIOLET       = 'rgba(203, 79, 255,';
   const WHITE        = 'rgba(246, 246, 246,';
 
