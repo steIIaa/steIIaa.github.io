@@ -8,13 +8,13 @@
 
   // --- config ---
   const CELL         = 72;    // resting grid spacing
-  const PUSH_RADIUS  = 90;    // how far cursor pushes (roughly 1-2 nodes)
-  const PUSH_FORCE   = 55;    // how far nodes get displaced at center
+  const PUSH_RADIUS  = 267;    // how far cursor pushes (roughly 1-2 nodes)
+  const PUSH_FORCE   = 67;    // how far nodes get displaced at center
   const SPRING       = 0.032; // how fast they drift back (low = floaty)
-  const DAMPING      = 0.78;  // velocity damping (lower = more jelly)
+  const DAMPING      = 1;  // velocity damping (lower = more jelly)
   const LINE_ALPHA   = 0.13;  // base line opacity
   const DOT_RADIUS   = 2;     // resting node dot size
-  const DRIFT_SPEED  = 0.012;  // how strongly nodes steer toward their wander target
+  const DRIFT_SPEED  = 0.1;  // how strongly nodes steer toward their wander target
   const DRIFT_AMOUNT = 22;     // how far each new wander target can be from origin
   const VIOLET       = 'rgba(203, 79, 255,';
   const WHITE        = 'rgba(246, 246, 246,';
