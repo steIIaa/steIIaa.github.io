@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ================================================
+    PAGE META — edit title/description freely
+  ================================================ -->
+  <title>infaRED — ultraviolet.</title>
+  <meta name="description" content="infaRED is a Discord moderation bot built by ultraviolet games.">
+
+  <link rel="icon" type="image/png" href="assets/ultraviolet-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="infared.css">
+</head>
+<body>
+
+  <canvas id="grid"></canvas>
+  <div class="noise"></div>
+
+  <header class="nav">
+    <a href="index.html" class="nav__mark">ultraviolet<span class="dot">.</span></a>
+    <nav class="nav__links">
+      <a href="index.html#games">games</a>
+      <a href="index.html#studio">studio</a>
+      <a href="index.html#contact">contact</a>
+    </nav>
+  </header>
+
+  <main class="ir-page">
+
+    <!-- ================================================
+      HERO — edit the tagline and the two button links
+    ================================================ -->
+    <section class="ir-hero">
+      <div class="ir-hero__logo">
+        <img src="assets/infared-logo.png" alt="infaRED logo">
+      </div>
+      <div class="ir-hero__text">
+        <p class="eyebrow">discord bot</p>
+        <h1 class="ir-title">infaRED<span class="dot ir-dot--red">.</span></h1>
+
+        <!-- TAGLINE — change this line -->
+        <p class="ir-tagline">a moderation bot built for simple and easy usage. constantly receiving new features.</p>
+
+        <div class="ir-hero__actions">
+          <!-- PRIMARY BUTTON — change href to your real invite link -->
+          <a href="https://discord.gg/nvfZEFQKXy" class="btn btn--primary" target="_blank" rel="noopener">add to discord →</a>
+          <!-- SECONDARY BUTTON — change href to your support server if you have one -->
+          <a href="https://discord.gg/nvfZEFQKXy" class="btn btn--ghost" target="_blank" rel="noopener">support server →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================
+      SCREENSHOTS — replace the src on each img tag with
+      your real screenshot paths once you have them.
+      Add or remove <figure> blocks as needed.
+      Recommended size: 1280x720px or 16:9 ratio.
+    ================================================ -->
+    <section class="ir-screenshots">
+      <p class="section-label">// preview</p>
+      <div class="ir-screenshots__grid">
+
+        <figure class="ir-screenshot">
+          <div class="ir-screenshot__placeholder">
+            <span>screenshot 1</span>
+            <p>replace the commented img tag below with your real screenshot</p>
+          </div>
+          <!-- <img src="assets/infared-screen-1.png" alt="infaRED screenshot 1"> -->
+        </figure>
+
+        <figure class="ir-screenshot">
+          <div class="ir-screenshot__placeholder">
+            <span>screenshot 2</span>
+            <p>replace the commented img tag below with your real screenshot</p>
+          </div>
+          <!-- <img src="assets/infared-screen-2.png" alt="infaRED screenshot 2"> -->
+        </figure>
+
+        <figure class="ir-screenshot">
+          <div class="ir-screenshot__placeholder">
+            <span>screenshot 3</span>
+            <p>replace the commented img tag below with your real screenshot</p>
+          </div>
+          <!-- <img src="assets/infared-screen-3.png" alt="infaRED screenshot 3"> -->
+        </figure>
+
+      </div>
+    </section>
+
+    <!-- ================================================
+      COMMANDS — edit command names, descriptions, and
+      emoji freely. Add/remove <div class="ir-cmd">
+      blocks as needed. Section headings are the <h3> tags.
+    ================================================ -->
+    <section class="ir-commands">
+      <p class="section-label">// commands</p>
+
+      <!-- MOD COMMANDS -->
+      <div class="ir-cmd-group">
+        <h3 class="ir-cmd-group__title">🛡️ mod commands <span class="ir-cmd-group__sub">restricted to mod roles only</span></h3>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">🔨</span>
+            <code class="ir-cmd__name">/ban &lt;member&gt; [reason] [duration] [delete_messages]</code>
+          </div>
+          <p class="ir-cmd__desc">Ban a member permanently or for a set duration (e.g. <code>1h</code>, <code>7d</code>). Auto-unbans when the timer expires.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">✅</span>
+            <code class="ir-cmd__name">/unban &lt;user_id&gt; [reason]</code>
+          </div>
+          <p class="ir-cmd__desc">Unban a user by their Discord ID.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">👢</span>
+            <code class="ir-cmd__name">/kick &lt;member&gt; [reason]</code>
+          </div>
+          <p class="ir-cmd__desc">Kick a member from the server.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">⏱️</span>
+            <code class="ir-cmd__name">/timeout &lt;member&gt; &lt;duration&gt; [reason]</code>
+          </div>
+          <p class="ir-cmd__desc">Temporarily mute a member for up to 28 days (e.g. <code>10m</code>, <code>2h</code>, <code>1d</code>).</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">⚠️</span>
+            <code class="ir-cmd__name">/warn &lt;member&gt; [reason]</code>
+          </div>
+          <p class="ir-cmd__desc">Issue a warning to a member. They'll be notified via DM.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">🐢</span>
+            <code class="ir-cmd__name">/slowmode &lt;duration&gt;</code>
+          </div>
+          <p class="ir-cmd__desc">Set slowmode on the current channel. Use <code>0s</code> to disable.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">📋</span>
+            <code class="ir-cmd__name">/cases view &lt;member&gt;</code>
+          </div>
+          <p class="ir-cmd__desc">View all logged warnings for a member.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">🗑️</span>
+            <code class="ir-cmd__name">/cases clear &lt;member&gt;</code>
+          </div>
+          <p class="ir-cmd__desc">Clear all warnings for a member.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">🔒</span>
+            <span class="ir-cmd__name ir-cmd__name--text">thread closing</span>
+          </div>
+          <p class="ir-cmd__desc">Add the close tag to any forum thread to trigger the close flow — the bot will ask for a reason, notify the thread owner, then archive and lock it.</p>
+        </div>
+      </div>
+
+      <!-- BOT COMMANDS -->
+      <div class="ir-cmd-group">
+        <h3 class="ir-cmd-group__title">📖 bot commands <span class="ir-cmd-group__sub">available to everyone</span></h3>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">🏠</span>
+            <code class="ir-cmd__name">/serverinfo</code>
+          </div>
+          <p class="ir-cmd__desc">See stats about the server like member count, boost level, and creation date.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">⭐</span>
+            <code class="ir-cmd__name">/rank [@member]</code>
+          </div>
+          <p class="ir-cmd__desc">Check your XP and current level. You earn XP just by sending messages!</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">📊</span>
+            <code class="ir-cmd__name">/poll &lt;question&gt; [options]</code>
+          </div>
+          <p class="ir-cmd__desc">Create a quick Yes/No poll, or pass comma-separated options for a multi-choice vote.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">🎫</span>
+            <code class="ir-cmd__name">/ticket open [reason]</code>
+          </div>
+          <p class="ir-cmd__desc">Open a private support ticket with the mod team.</p>
+        </div>
+
+        <div class="ir-cmd">
+          <div class="ir-cmd__top">
+            <span class="ir-cmd__emoji">🔒</span>
+            <code class="ir-cmd__name">/ticket close</code>
+          </div>
+          <p class="ir-cmd__desc">Close your support ticket once your issue is resolved.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================
+      CTA — change the href to your real invite link
+    ================================================ -->
+    <section class="ir-cta">
+      <h2 class="ir-cta__title">ready to add infaRED<span class="dot ir-dot--red">.</span></h2>
+      <a href="https://discord.gg/nvfZEFQKXy" class="btn btn--primary" target="_blank" rel="noopener">add to discord →</a>
+    </section>
+
+  </main>
+
+  <footer id="contact" class="footer">
+    <div class="footer__row">
+      <span class="footer__mark">ultraviolet<span class="dot">.</span></span>
+      <div class="footer__links">
+        <a href="https://github.com/steIIaa/" target="_blank" rel="noopener">github</a>
+        <a href="https://discord.gg/nvfZEFQKXy" target="_blank" rel="noopener">discord</a>
+        <a href="mailto:alfiereviewer@gmail.com">email</a>
+      </div>
+    </div>
+    <p class="footer__fine">thanks for visiting the site :3</p>
+  </footer>
+
+  <script src="grid.js"></script>
+
+</body>
+</html>

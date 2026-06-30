@@ -1,0 +1,319 @@
+/* ============================================
+   infared.css — infaRED page styles
+   Builds on top of style.css. Red accent replaces
+   violet wherever it's infaRED-specific.
+   ============================================ */
+
+:root {
+  --red:       #ff3c3c;
+  --red-dim:   rgba(255, 60, 60, 0.12);
+}
+
+/* primary button — used on this page, not the main site */
+.btn--primary {
+  background: var(--red);
+  color: #fff;
+  border: 1px solid var(--red);
+  font-weight: 600;
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  background: #ff5f5f;
+  border-color: #ff5f5f;
+}
+
+.ir-dot--red {
+  color: var(--red);
+}
+
+/* ============================================
+   page wrapper
+   ============================================ */
+
+.ir-page {
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================
+   hero
+   ============================================ */
+
+.ir-hero {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  gap: clamp(32px, 6vw, 96px);
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 120px var(--pad) 80px;
+}
+
+.ir-hero__logo {
+  flex-shrink: 0;
+  width: clamp(100px, 14vw, 180px);
+  height: clamp(100px, 14vw, 180px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.ir-hero__logo img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px rgba(255, 60, 60, 0.3));
+}
+
+.ir-hero__text {
+  flex: 1;
+}
+
+.ir-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  line-height: 1;
+  margin: 8px 0 16px;
+  color: var(--white-soft);
+}
+
+.ir-tagline {
+  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+  color: var(--text-dim);
+  max-width: 520px;
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+
+.ir-hero__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ============================================
+   screenshots
+   ============================================ */
+
+.ir-screenshots {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--pad) 80px;
+}
+
+.ir-screenshots__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ir-screenshot {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--surface);
+  aspect-ratio: 16 / 9;
+  transition: border-color 0.2s ease;
+}
+
+.ir-screenshot:hover {
+  border-color: rgba(255, 60, 60, 0.3);
+}
+
+.ir-screenshot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ir-screenshot__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.ir-screenshot__placeholder span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ir-screenshot__placeholder p {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  opacity: 0.6;
+  max-width: 180px;
+  line-height: 1.4;
+}
+
+/* ============================================
+   commands
+   ============================================ */
+
+.ir-commands {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--pad) 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.ir-cmd-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ir-cmd-group__title {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--white-soft);
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ir-cmd-group__sub {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
+.ir-cmd {
+  padding: 14px 16px;
+  border-left: 2px solid var(--line);
+  background: transparent;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  border-radius: 0 4px 4px 0;
+}
+
+.ir-cmd:hover {
+  border-left-color: var(--red);
+  background: var(--red-dim);
+}
+
+.ir-cmd__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.ir-cmd__emoji {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.ir-cmd__name {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--white-soft);
+  background: rgba(255,255,255,0.06);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+}
+
+.ir-cmd__name--text {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.ir-cmd__desc {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+  margin: 0;
+  padding-left: 28px;
+}
+
+.ir-cmd__desc code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--white-soft);
+  background: rgba(255,255,255,0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ============================================
+   bottom CTA
+   ============================================ */
+
+.ir-cta {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--pad) 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  border-top: 1px solid var(--line);
+  padding-top: 64px;
+}
+
+.ir-cta__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  margin: 0;
+  color: var(--white-soft);
+}
+
+/* ============================================
+   responsive
+   ============================================ */
+
+@media (max-width: 720px) {
+  .ir-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: unset;
+    padding-top: 100px;
+  }
+
+  .ir-screenshots__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ir-hero__actions {
+    flex-direction: column;
+  }
+
+  .ir-hero__actions .btn {
+    text-align: center;
+  }
+
+  .ir-cta {
+    align-items: stretch;
+  }
+
+  .ir-cta .btn {
+    text-align: center;
+  }
+}
