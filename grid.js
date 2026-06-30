@@ -24,10 +24,27 @@
   const PUSH_AMOUNT   = 7;     // px nodes are shoved per frame while inside the push radius
   const DRIFT_SPEED   = 0.5;   // base ambient drift speed per axis
 
+  // color flood: a wave of color expands outward from a random seed
+  // node until every node has flipped, then reverses to the other
+  // color from a new random seed, forever alternating.
+  const FLOOD_SPEED     = 900;  // px/sec the color wave expands outward
+  const FLOOD_EDGE_SOFT = 120;  // px width of the soft transition band at the wave's edge
+  const GREY_RGB        = [246, 246, 246];
+  const VIOLET_RGB      = [203, 79, 255];
+
   let w, h, dpr;
   let nodes = [];
   let pointer = { x: -9999, y: -9999 };
   let rafId;
+  let lastTime = 0;
+
+  // flood state: expands from (seedX, seedY) toward targetColor (0=grey, 1=violet)
+  let flood = {
+    seedX: 0, seedY: 0,
+    radius: 0,
+    maxRadius: 0,
+    targetMix: 1 // 1 = flooding to violet, 0 = flooding to grey
+  };
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -51,9 +68,26 @@
         y: Math.random() * h,
         size,
         dx: (Math.random() - 0.5) * DRIFT_SPEED,
-        dy: (Math.random() - 0.5) * DRIFT_SPEED
+        dy: (Math.random() - 0.5) * DRIFT_SPEED,
+        mix: 0 // 0 = grey, 1 = violet — current color blend of this node
       });
     }
+    startFlood(1 - flood.targetMix); // begin opposite of whatever the last flood was heading toward
+  }
+
+  function startFlood(targetMix) {
+    if (nodes.length === 0) return;
+    const seed = nodes[Math.floor(Math.random() * nodes.length)];
+    let maxDist = 0;
+    for (const n of nodes) {
+      const d = Math.hypot(n.x - seed.x, n.y - seed.y);
+      if (d > maxDist) maxDist = d;
+    }
+    flood.seedX = seed.x;
+    flood.seedY = seed.y;
+    flood.radius = 0;
+    flood.maxRadius = maxDist + FLOOD_EDGE_SOFT;
+    flood.targetMix = targetMix;
   }
 
   function onMove(e) {
@@ -68,7 +102,11 @@
     }
   }
 
-  function update() {
+  function update(dt) {
+    // advance the flood wave's radius outward at a constant speed
+    flood.radius += FLOOD_SPEED * dt;
+    const floodDone = flood.radius >= flood.maxRadius;
+
     for (const n of nodes) {
       // bounce off edges
       if (n.x > w || n.x < 0) n.dx = -n.dx;
@@ -89,11 +127,39 @@
 
       n.x += n.dx;
       n.y += n.dy;
+
+      // color flood: as the wave's edge passes this node's distance
+      // from the seed, blend its color toward the flood's target
+      const distFromSeed = Math.hypot(n.x - flood.seedX, n.y - flood.seedY);
+      const edge = flood.radius - distFromSeed;
+      // edge < 0: wave hasn't arrived yet, node keeps its current color
+      // 0 <= edge < FLOOD_EDGE_SOFT: node is inside the soft transition band
+      // edge >= FLOOD_EDGE_SOFT: wave has fully passed, node is fully flipped
+      if (edge > 0) {
+        const t = Math.min(edge / FLOOD_EDGE_SOFT, 1);
+        n.mix = n.mix + (flood.targetMix - n.mix) * t * 0.3;
+        if (t >= 1) n.mix = flood.targetMix;
+      }
+    }
+
+    // once the wave has covered every node, start the next one in the opposite color
+    if (floodDone) {
+      startFlood(1 - flood.targetMix);
     }
   }
 
-  function draw() {
-    update();
+  function lerpColor(rgbA, rgbB, t) {
+    return [
+      Math.round(rgbA[0] + (rgbB[0] - rgbA[0]) * t),
+      Math.round(rgbA[1] + (rgbB[1] - rgbA[1]) * t),
+      Math.round(rgbA[2] + (rgbB[2] - rgbA[2]) * t)
+    ];
+  }
+
+  function draw(time) {
+    const dt = lastTime ? Math.min((time - lastTime) / 1000, 0.05) : 0.016;
+    lastTime = time;
+    update(dt);
 
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, w, h);
@@ -112,9 +178,9 @@
           );
           const glow = nearCursor < PUSH_RADIUS ? (1 - nearCursor / PUSH_RADIUS) : 0;
           const alpha = t * 0.32 + glow * 0.5;
-          ctx.strokeStyle = glow > 0.4
-            ? `rgba(203,79,255,${alpha})`
-            : `rgba(246,246,246,${alpha})`;
+          const lineMix = (a.mix + b.mix) / 2;
+          const rgb = lerpColor(GREY_RGB, VIOLET_RGB, Math.max(lineMix, glow));
+          ctx.strokeStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -123,15 +189,15 @@
       }
     }
 
-    // nodes, glowing violet when near the cursor
+    // nodes — colored by their current flood mix, brightened near the cursor
     for (const n of nodes) {
       const dist = Math.hypot(n.x - pointer.x, n.y - pointer.y);
       const near = dist < PUSH_RADIUS ? (1 - dist / PUSH_RADIUS) : 0;
+      const rgb = lerpColor(GREY_RGB, VIOLET_RGB, Math.max(n.mix, near));
+      const alpha = 0.6 + near * 0.4;
       ctx.beginPath();
       ctx.arc(n.x, n.y, n.size + near * 1.5, 0, Math.PI * 2);
-      ctx.fillStyle = near > 0.3
-        ? `rgba(203,79,255,${0.5 + near * 0.5})`
-        : `rgba(246,246,246,0.6)`;
+      ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
       ctx.fill();
     }
 
