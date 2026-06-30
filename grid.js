@@ -14,6 +14,8 @@
   const DAMPING      = 0.78;  // velocity damping (lower = more jelly)
   const LINE_ALPHA   = 0.13;  // base line opacity
   const DOT_RADIUS   = 2;     // resting node dot size
+  const DRIFT_SPEED  = 0.0006; // how fast the ambient wander cycles (lower = slower)
+  const DRIFT_AMOUNT = 7;      // max px of ambient wander from origin
   const VIOLET       = 'rgba(203, 79, 255,';
   const WHITE        = 'rgba(246, 246, 246,';
 
@@ -22,13 +24,18 @@
   let cols, rows;
   let pointer = { x: -9999, y: -9999 };
   let rafId;
+  let t = 0;
 
   // --- node factory ---
   function makeNode(ox, oy) {
     return {
       ox, oy,       // origin (resting position)
       x: ox, y: oy, // current position
-      vx: 0, vy: 0  // velocity
+      vx: 0, vy: 0, // velocity
+      driftPhaseX: Math.random() * Math.PI * 2,
+      driftPhaseY: Math.random() * Math.PI * 2,
+      driftFreqX: 0.7 + Math.random() * 0.6,
+      driftFreqY: 0.7 + Math.random() * 0.6
     };
   }
 
@@ -81,8 +88,17 @@
 
   // --- physics ---
   function update() {
+    t += 1;
+
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
+
+      // ambient wander target — each node circles its own origin
+      // at its own phase/frequency so motion never looks synced
+      const driftX = Math.sin(t * DRIFT_SPEED * n.driftFreqX + n.driftPhaseX) * DRIFT_AMOUNT;
+      const driftY = Math.cos(t * DRIFT_SPEED * n.driftFreqY + n.driftPhaseY) * DRIFT_AMOUNT;
+      const targetX = n.ox + driftX;
+      const targetY = n.oy + driftY;
 
       // push from cursor
       const dx = n.x - pointer.x;
@@ -90,15 +106,15 @@
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < PUSH_RADIUS && dist > 0.01) {
-        const t = 1 - dist / PUSH_RADIUS;
-        const force = t * t * PUSH_FORCE;
+        const ft = 1 - dist / PUSH_RADIUS;
+        const force = ft * ft * PUSH_FORCE;
         n.vx += (dx / dist) * force * 0.18;
         n.vy += (dy / dist) * force * 0.18;
       }
 
-      // spring back to origin
-      n.vx += (n.ox - n.x) * SPRING;
-      n.vy += (n.oy - n.y) * SPRING;
+      // spring back toward the wandering target (not a fixed point)
+      n.vx += (targetX - n.x) * SPRING;
+      n.vy += (targetY - n.y) * SPRING;
 
       // damping
       n.vx *= DAMPING;
