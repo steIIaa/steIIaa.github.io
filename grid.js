@@ -168,6 +168,7 @@
     const dt = Math.min((time - lastTime) / 1000, 0.05);
     lastTime = time;
     update(dt);
+    window.__floodDebug = { radius: flood.radius, maxRadius: flood.maxRadius, targetMix: flood.targetMix, nodeCount: nodes.length, sampleMix: nodes[0] ? nodes[0].mix : null };
 
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, w, h);
