@@ -1,8 +1,9 @@
 /* ============================================
    ultraviolet. — interactive constellation background
-   Nodes drift slowly in straight lines, bouncing off
-   the edges. Lines connect nodes that are close together,
-   and the cursor pushes nearby nodes aside.
+   Nodes drift in straight lines, bouncing off the edges.
+   Lines connect nearby nodes. The cursor directly pushes
+   nodes aside (snappy, not steered) — they speed up while
+   being pushed and settle back to normal drift after.
    ============================================ */
 
 (function () {
@@ -14,15 +15,14 @@
   ).matches;
 
   // --- config ---
-  // NODE_COUNT: how many points make up the constellation.
-  // Default is 90. Raise it for a denser field, lower it for a
-  // sparser one — more nodes costs more per-frame computation
-  // since connections are checked between every pair of nodes.
-  const NODE_COUNT   = 90;
-  const LINK_DIST    = 140;   // max distance two nodes can be apart and still draw a line
-  const PUSH_RADIUS  = 130;   // how far the cursor reaches to redirect nodes
-  const TURN_STRENGTH = 1; // how sharply nodes turn away from the cursor (0-1)
-  const DRIFT_SPEED  = 1;  // constant speed every node always travels at — never changes
+  // Node count auto-scales with screen area rather than being fixed,
+  // so it stays proportionally dense on both small and large screens.
+  // Lower AREA_PER_NODE = more nodes (denser); raise it for fewer.
+  const AREA_PER_NODE = 9000;
+  const LINK_DIST_SQ  = 15000; // squared distance for link check (avoids sqrt per pair, per frame)
+  const PUSH_RADIUS   = 80;    // how far the cursor reaches to push nodes
+  const PUSH_AMOUNT   = 7;     // px nodes are shoved per frame while inside the push radius
+  const DRIFT_SPEED   = 0.5;   // base ambient drift speed per axis
 
   let w, h, dpr;
   let nodes = [];
@@ -43,13 +43,15 @@
 
   function buildNodes() {
     nodes = [];
-    for (let i = 0; i < NODE_COUNT; i++) {
-      const angle = Math.random() * Math.PI * 2;
+    const count = Math.floor((w * h) / AREA_PER_NODE);
+    for (let i = 0; i < count; i++) {
+      const size = Math.random() * 1.5 + 1;
       nodes.push({
         x: Math.random() * w,
         y: Math.random() * h,
-        dirX: Math.cos(angle),
-        dirY: Math.sin(angle)
+        size,
+        dx: (Math.random() - 0.5) * DRIFT_SPEED,
+        dy: (Math.random() - 0.5) * DRIFT_SPEED
       });
     }
   }
@@ -68,31 +70,25 @@
 
   function update() {
     for (const n of nodes) {
-      // steer heading away from the cursor when nearby — direction
-      // changes, but speed never does
-      const dx = n.x - pointer.x;
-      const dy = n.y - pointer.y;
+      // bounce off edges
+      if (n.x > w || n.x < 0) n.dx = -n.dx;
+      if (n.y > h || n.y < 0) n.dy = -n.dy;
+
+      // direct push away from cursor — snappy, not steered.
+      // nodes move faster than normal while inside the radius,
+      // and settle back to their regular drift once they leave it.
+      const dx = pointer.x - n.x;
+      const dy = pointer.y - n.y;
       const dist = Math.hypot(dx, dy);
-      if (dist < PUSH_RADIUS && dist > 0.01) {
-        const t = 1 - dist / PUSH_RADIUS;
-        const awayX = dx / dist;
-        const awayY = dy / dist;
-        n.dirX += awayX * t * t * TURN_STRENGTH;
-        n.dirY += awayY * t * t * TURN_STRENGTH;
-        // re-normalize so speed stays exactly DRIFT_SPEED, only heading changes
-        const len = Math.hypot(n.dirX, n.dirY) || 1;
-        n.dirX /= len;
-        n.dirY /= len;
+      if (dist < PUSH_RADIUS) {
+        if (pointer.x < n.x && n.x < w - n.size * 10) n.x += PUSH_AMOUNT;
+        if (pointer.x > n.x && n.x > n.size * 10) n.x -= PUSH_AMOUNT;
+        if (pointer.y < n.y && n.y < h - n.size * 10) n.y += PUSH_AMOUNT;
+        if (pointer.y > n.y && n.y > n.size * 10) n.y -= PUSH_AMOUNT;
       }
 
-      // always move at full constant speed along the current heading
-      n.x += n.dirX * DRIFT_SPEED;
-      n.y += n.dirY * DRIFT_SPEED;
-
-      if (n.x < 0) { n.x = 0; n.dirX *= -1; }
-      else if (n.x > w) { n.x = w; n.dirX *= -1; }
-      if (n.y < 0) { n.y = 0; n.dirY *= -1; }
-      else if (n.y > h) { n.y = h; n.dirY *= -1; }
+      n.x += n.dx;
+      n.y += n.dy;
     }
   }
 
@@ -106,15 +102,16 @@
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
-        const d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (d < LINK_DIST) {
-          const t = 1 - d / LINK_DIST;
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < LINK_DIST_SQ) {
+          const t = 1 - distSq / LINK_DIST_SQ;
           const nearCursor = Math.min(
             Math.hypot(a.x - pointer.x, a.y - pointer.y),
             Math.hypot(b.x - pointer.x, b.y - pointer.y)
           );
           const glow = nearCursor < PUSH_RADIUS ? (1 - nearCursor / PUSH_RADIUS) : 0;
-          const alpha = t * 0.18 + glow * 0.35;
+          const alpha = t * 0.32 + glow * 0.5;
           ctx.strokeStyle = glow > 0.4
             ? `rgba(203,79,255,${alpha})`
             : `rgba(246,246,246,${alpha})`;
@@ -131,7 +128,7 @@
       const dist = Math.hypot(n.x - pointer.x, n.y - pointer.y);
       const near = dist < PUSH_RADIUS ? (1 - dist / PUSH_RADIUS) : 0;
       ctx.beginPath();
-      ctx.arc(n.x, n.y, 1.6 + near * 1.5, 0, Math.PI * 2);
+      ctx.arc(n.x, n.y, n.size + near * 1.5, 0, Math.PI * 2);
       ctx.fillStyle = near > 0.3
         ? `rgba(203,79,255,${0.5 + near * 0.5})`
         : `rgba(246,246,246,0.6)`;
@@ -148,9 +145,10 @@
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
-        const d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (d < LINK_DIST) {
-          const alpha = (1 - d / LINK_DIST) * 0.18;
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < LINK_DIST_SQ) {
+          const alpha = (1 - distSq / LINK_DIST_SQ) * 0.18;
           ctx.strokeStyle = `rgba(246,246,246,${alpha})`;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
@@ -161,7 +159,7 @@
     }
     for (const n of nodes) {
       ctx.beginPath();
-      ctx.arc(n.x, n.y, 1.6, 0, Math.PI * 2);
+      ctx.arc(n.x, n.y, n.size, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(246,246,246,0.6)';
       ctx.fill();
     }
