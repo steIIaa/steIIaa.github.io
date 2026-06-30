@@ -21,8 +21,8 @@
   const NODE_COUNT   = 90;
   const LINK_DIST    = 140;   // max distance two nodes can be apart and still draw a line
   const PUSH_RADIUS  = 130;   // how far the cursor reaches to redirect nodes
-  const TURN_STRENGTH = 0.06; // how sharply nodes turn away from the cursor (0-1)
-  const DRIFT_SPEED  = 0.12;  // constant speed every node always travels at — never changes
+  const TURN_STRENGTH = 0.35; // how sharply nodes turn away from the cursor (0-1)
+  const DRIFT_SPEED  = 0.67;  // constant speed every node always travels at — never changes
 
   let w, h, dpr;
   let nodes = [];
