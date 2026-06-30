@@ -58,6 +58,8 @@
     buildNodes();
   }
 
+  let floodStarted = false;
+
   function buildNodes() {
     nodes = [];
     const count = Math.floor((w * h) / AREA_PER_NODE);
@@ -72,7 +74,12 @@
         mix: 0 // 0 = grey, 1 = violet — current color blend of this node
       });
     }
-    startFlood(1 - flood.targetMix); // begin opposite of whatever the last flood was heading toward
+    // only kick off the flood cycle once, on first load — resizing
+    // the window shouldn't restart it
+    if (!floodStarted) {
+      floodStarted = true;
+      startFlood(1);
+    }
   }
 
   function startFlood(targetMix) {
@@ -157,7 +164,8 @@
   }
 
   function draw(time) {
-    const dt = lastTime ? Math.min((time - lastTime) / 1000, 0.05) : 0.016;
+    if (lastTime === 0) lastTime = time; // first frame: establish a real baseline
+    const dt = Math.min((time - lastTime) / 1000, 0.05);
     lastTime = time;
     update(dt);
 
@@ -243,6 +251,6 @@
   if (prefersReducedMotion) {
     drawStatic();
   } else {
-    draw();
+    rafId = requestAnimationFrame(draw);
   }
 })();
