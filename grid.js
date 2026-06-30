@@ -8,14 +8,14 @@
 
   // --- config ---
   const CELL         = 72;    // resting grid spacing
-  const PUSH_RADIUS  = 200;    // how far cursor pushes (roughly 1-2 nodes)
-  const PUSH_FORCE   = 67;    // how far nodes get displaced at center
+  const PUSH_RADIUS  = 90;    // how far cursor pushes (roughly 1-2 nodes)
+  const PUSH_FORCE   = 55;    // how far nodes get displaced at center
   const SPRING       = 0.032; // how fast they drift back (low = floaty)
   const DAMPING      = 0.78;  // velocity damping (lower = more jelly)
   const LINE_ALPHA   = 0.13;  // base line opacity
   const DOT_RADIUS   = 2;     // resting node dot size
-  const DRIFT_SPEED  = 0.005; // how fast the ambient wander cycles (lower = slower)
-  const DRIFT_AMOUNT = 50;      // max px of ambient wander from origin
+  const DRIFT_SPEED  = 0.012;  // how strongly nodes steer toward their wander target
+  const DRIFT_AMOUNT = 22;     // how far each new wander target can be from origin
   const VIOLET       = 'rgba(203, 79, 255,';
   const WHITE        = 'rgba(246, 246, 246,';
 
@@ -29,13 +29,13 @@
   // --- node factory ---
   function makeNode(ox, oy) {
     return {
-      ox, oy,       // origin (resting position)
+      ox, oy,       // origin (resting position, used for line stretch calc)
       x: ox, y: oy, // current position
       vx: 0, vy: 0, // velocity
-      driftPhaseX: Math.random() * Math.PI * 2,
-      driftPhaseY: Math.random() * Math.PI * 2,
-      driftFreqX: 0.7 + Math.random() * 0.6,
-      driftFreqY: 0.7 + Math.random() * 0.6
+      // each node walks toward its own ever-changing wander target
+      wanderX: ox,
+      wanderY: oy,
+      wanderTimer: Math.random() * 120 // stagger when each node first picks a new target
     };
   }
 
@@ -93,28 +93,37 @@
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
 
-      // ambient wander target — each node circles its own origin
-      // at its own phase/frequency so motion never looks synced
-      const driftX = Math.sin(t * DRIFT_SPEED * n.driftFreqX + n.driftPhaseX) * DRIFT_AMOUNT;
-      const driftY = Math.cos(t * DRIFT_SPEED * n.driftFreqY + n.driftPhaseY) * DRIFT_AMOUNT;
-      const targetX = n.ox + driftX;
-      const targetY = n.oy + driftY;
+      // periodically pick a new nearby wander target so the node
+      // actually travels over time instead of circling one spot
+      n.wanderTimer -= 1;
+      if (n.wanderTimer <= 0) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = DRIFT_AMOUNT * (0.5 + Math.random() * 0.5);
+        n.wanderX = n.ox + Math.cos(angle) * dist;
+        n.wanderY = n.oy + Math.sin(angle) * dist;
+        n.wanderTimer = 90 + Math.random() * 120; // next target in ~1.5-3.5s at 60fps
+      }
 
       // push from cursor
       const dx = n.x - pointer.x;
       const dy = n.y - pointer.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const dist2 = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist < PUSH_RADIUS && dist > 0.01) {
-        const ft = 1 - dist / PUSH_RADIUS;
+      if (dist2 < PUSH_RADIUS && dist2 > 0.01) {
+        const ft = 1 - dist2 / PUSH_RADIUS;
         const force = ft * ft * PUSH_FORCE;
-        n.vx += (dx / dist) * force * 0.18;
-        n.vy += (dy / dist) * force * 0.18;
+        n.vx += (dx / dist2) * force * 0.18;
+        n.vy += (dy / dist2) * force * 0.18;
       }
 
-      // spring back toward the wandering target (not a fixed point)
-      n.vx += (targetX - n.x) * SPRING;
-      n.vy += (targetY - n.y) * SPRING;
+      // gently steer toward the current wander target (ambient motion)
+      n.vx += (n.wanderX - n.x) * DRIFT_SPEED;
+      n.vy += (n.wanderY - n.y) * DRIFT_SPEED;
+
+      // and a much weaker pull back toward true origin, so nodes
+      // don't wander off forever and the grid shape stays recognizable
+      n.vx += (n.ox - n.x) * SPRING;
+      n.vy += (n.oy - n.y) * SPRING;
 
       // damping
       n.vx *= DAMPING;
