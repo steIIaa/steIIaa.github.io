@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>skrate — devlog — ultraviolet.</title>
+  <meta name="description" content="Development updates for skrate, an upcoming VR skating game by ultraviolet games.">
+  <link rel="icon" type="image/png" href="assets/ultraviolet-logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="devlog.css">
+
+  <!-- ================================================
+    SUPABASE CONFIG — same values as infared.html
+  ================================================ -->
+  <script>
+    window.SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+    window.SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <canvas id="grid"></canvas>
+  <div class="noise"></div>
+
+  <header class="nav">
+    <a href="index.html" class="nav__mark">ultraviolet<span class="dot">.</span></a>
+    <nav class="nav__links">
+      <a href="index.html#games">games</a>
+      <a href="index.html#studio">studio</a>
+      <a href="index.html#contact">contact</a>
+    </nav>
+  </header>
+
+  <main class="dl-page">
+
+    <section class="dl-hero">
+      <div class="dl-hero__inner">
+        <p class="eyebrow">devlog</p>
+        <!-- GAME TITLE — change this if the name changes -->
+        <h1 class="dl-title">skrate<span class="dot">.</span></h1>
+        <!-- TAGLINE — change this -->
+        <p class="dl-tagline">a hand-locomotive VR game focused around skating. follow along as we build it.</p>
+      </div>
+    </section>
+
+    <!-- new post form — only visible to whitelisted devs -->
+    <section class="dl-compose" id="dl-compose" style="display:none">
+      <p class="section-label">// new post</p>
+      <div class="dl-compose__form">
+        <div class="dl-compose__user" id="dl-compose-user"></div>
+        <input
+          class="dl-compose__input"
+          id="dl-title"
+          type="text"
+          placeholder="post title..."
+          maxlength="120"
+        >
+        <textarea
+          class="dl-compose__textarea"
+          id="dl-body"
+          placeholder="write your update here..."
+          rows="8"
+        ></textarea>
+
+        <!-- image URLs — paste a direct image link per line -->
+        <label class="dl-compose__label" for="dl-images">
+          image URLs <span>(one per line — use imgur, discord CDN, etc.)</span>
+        </label>
+        <textarea
+          class="dl-compose__textarea dl-compose__textarea--sm"
+          id="dl-images"
+          placeholder="https://i.imgur.com/example.png"
+          rows="3"
+        ></textarea>
+
+        <div class="dl-compose__actions">
+          <button class="btn btn--primary" id="dl-submit">post update →</button>
+        </div>
+        <p class="dl-compose__error" id="dl-error"></p>
+      </div>
+    </section>
+
+    <section class="dl-posts">
+      <p class="section-label">// updates</p>
+      <div class="dl-posts__list" id="dl-posts-list">
+        <p class="dl-posts__loading">loading...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="contact" class="footer">
+    <div class="footer__row">
+      <span class="footer__mark">ultraviolet<span class="dot">.</span></span>
+      <div class="footer__links">
+        <a href="https://github.com/steIIaa/" target="_blank" rel="noopener">github</a>
+        <a href="https://discord.gg/nvfZEFQKXy" target="_blank" rel="noopener">discord</a>
+        <a href="mailto:alfiereviewer@gmail.com">email</a>
+      </div>
+    </div>
+    <p class="footer__fine">thanks for visiting the site :3</p>
+    <div class="footer__dev" id="footer-dev-auth"></div>
+  </footer>
+
+  <script src="grid.js"></script>
+  <script src="dev-auth.js"></script>
+  <script src="devlog.js"></script>
+
+</body>
+</html>
