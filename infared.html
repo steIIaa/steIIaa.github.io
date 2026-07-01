@@ -10,12 +10,22 @@
   <title>infaRED — ultraviolet.</title>
   <meta name="description" content="infaRED is a Discord moderation bot built by ultraviolet games.">
 
-  <link rel="icon" type="image/png" href="assets/UVcircle.png">
+  <link rel="icon" type="image/png" href="assets/ultraviolet-logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="infared.css">
+
+  <!-- ================================================
+    SUPABASE CONFIG — replace these two values after
+    creating your Supabase project (see setup guide)
+  ================================================ -->
+  <script>
+    window.SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+    window.SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -38,7 +48,7 @@
     ================================================ -->
     <section class="ir-hero">
       <div class="ir-hero__logo">
-        <img src="assets/infaRED (1)-chromakey.png" alt="infaRED logo">
+        <img src="assets/infared-logo.png" alt="infaRED logo">
       </div>
       <div class="ir-hero__text">
         <p class="eyebrow">discord bot</p>
@@ -49,7 +59,7 @@
 
         <div class="ir-hero__actions">
           <!-- PRIMARY BUTTON — change href to your real invite link -->
-          <a href="https://discord.com/oauth2/authorize?client_id=1520789668109615234&permissions=8&integration_type=0&scope=bot" class="btn btn--primary" target="_blank" rel="noopener">add to discord →</a>
+          <a href="https://discord.gg/nvfZEFQKXy" class="btn btn--primary" target="_blank" rel="noopener">add to discord →</a>
           <!-- SECONDARY BUTTON — change href to your support server if you have one -->
           <a href="https://discord.gg/nvfZEFQKXy" class="btn btn--ghost" target="_blank" rel="noopener">support server →</a>
         </div>
@@ -57,39 +67,44 @@
     </section>
 
     <!-- ================================================
-      SCREENSHOTS — replace the src on each img tag with
-      your real screenshot paths once you have them.
-      Add or remove <figure> blocks as needed.
-      Recommended size: 1280x720px or 16:9 ratio.
+      REVIEWS — powered by Supabase + Discord OAuth.
+      No editing needed here, it's all dynamic.
     ================================================ -->
-    <section class="ir-screenshots">
-      <p class="section-label">// preview</p>
-      <div class="ir-screenshots__grid">
+    <section class="ir-reviews" id="reviews">
+      <p class="section-label">// reviews</p>
 
-        <figure class="ir-screenshot">
-          <div class="ir-screenshot__placeholder">
-            <span>screenshot 1</span>
-            <p>placeholder</p>
-          </div>
-          <!-- <img src="assets/botpreview.png" alt="infaRED ban screenshot"> -->
-        </figure>
+      <div class="ir-reviews__header">
+        <div class="ir-reviews__summary">
+          <span class="ir-reviews__avg" id="reviews-avg">—</span>
+          <div class="ir-reviews__stars" id="reviews-avg-stars"></div>
+          <span class="ir-reviews__count" id="reviews-count">no reviews yet</span>
+        </div>
+        <div id="reviews-auth">
+          <!-- filled by JS depending on login state -->
+        </div>
+      </div>
 
-        <figure class="ir-screenshot">
-          <div class="ir-screenshot__placeholder">
-            <span>screenshot 2</span>
-            <p>placeholder</p>
-          </div>
-          <!-- <img src="assets/infared-screen-2.png" alt="infaRED screenshot 2"> -->
-        </figure>
+      <!-- review submission form (shown when logged in and hasn't reviewed yet) -->
+      <div class="ir-review-form" id="review-form" style="display:none">
+        <div class="ir-review-form__user" id="form-user"></div>
+        <div class="ir-review-form__stars" id="form-stars">
+          <button class="ir-star" data-val="1">★</button>
+          <button class="ir-star" data-val="2">★</button>
+          <button class="ir-star" data-val="3">★</button>
+          <button class="ir-star" data-val="4">★</button>
+          <button class="ir-star" data-val="5">★</button>
+        </div>
+        <textarea class="ir-review-form__text" id="form-text" placeholder="write your review..." maxlength="500" rows="4"></textarea>
+        <div class="ir-review-form__actions">
+          <span class="ir-review-form__chars"><span id="form-chars">0</span>/500</span>
+          <button class="btn btn--primary" id="form-submit">post review →</button>
+        </div>
+        <p class="ir-review-form__error" id="form-error"></p>
+      </div>
 
-        <figure class="ir-screenshot">
-          <div class="ir-screenshot__placeholder">
-            <span>screenshot 3</span>
-            <p>placeholder</p>
-          </div>
-          <!-- <img src="assets/infared-screen-3.png" alt="infaRED screenshot 3"> -->
-        </figure>
-
+      <!-- list of reviews -->
+      <div class="ir-reviews__list" id="reviews-list">
+        <div class="ir-reviews__loading">loading reviews...</div>
       </div>
     </section>
 
@@ -110,7 +125,7 @@
             <span class="ir-cmd__emoji">🔨</span>
             <code class="ir-cmd__name">/ban &lt;member&gt; [reason] [duration] [delete_messages]</code>
           </div>
-          <p class="ir-cmd__desc">ban a member permanently or for a set duration (e.g. <code>1h</code>, <code>7d</code>). auto-unbans when the timer expires.</p>
+          <p class="ir-cmd__desc">Ban a member permanently or for a set duration (e.g. <code>1h</code>, <code>7d</code>). Auto-unbans when the timer expires.</p>
         </div>
 
         <div class="ir-cmd">
@@ -118,7 +133,7 @@
             <span class="ir-cmd__emoji">✅</span>
             <code class="ir-cmd__name">/unban &lt;user_id&gt; [reason]</code>
           </div>
-          <p class="ir-cmd__desc">unban a user by their Discord ID.</p>
+          <p class="ir-cmd__desc">Unban a user by their Discord ID.</p>
         </div>
 
         <div class="ir-cmd">
@@ -126,7 +141,7 @@
             <span class="ir-cmd__emoji">👢</span>
             <code class="ir-cmd__name">/kick &lt;member&gt; [reason]</code>
           </div>
-          <p class="ir-cmd__desc">kick a member from the server.</p>
+          <p class="ir-cmd__desc">Kick a member from the server.</p>
         </div>
 
         <div class="ir-cmd">
@@ -134,7 +149,7 @@
             <span class="ir-cmd__emoji">⏱️</span>
             <code class="ir-cmd__name">/timeout &lt;member&gt; &lt;duration&gt; [reason]</code>
           </div>
-          <p class="ir-cmd__desc">temporarily mute a member for up to 28 days (e.g. <code>10m</code>, <code>2h</code>, <code>1d</code>).</p>
+          <p class="ir-cmd__desc">Temporarily mute a member for up to 28 days (e.g. <code>10m</code>, <code>2h</code>, <code>1d</code>).</p>
         </div>
 
         <div class="ir-cmd">
@@ -142,7 +157,7 @@
             <span class="ir-cmd__emoji">⚠️</span>
             <code class="ir-cmd__name">/warn &lt;member&gt; [reason]</code>
           </div>
-          <p class="ir-cmd__desc">issue a warning to a member. They'll be notified via DM.</p>
+          <p class="ir-cmd__desc">Issue a warning to a member. They'll be notified via DM.</p>
         </div>
 
         <div class="ir-cmd">
@@ -150,7 +165,7 @@
             <span class="ir-cmd__emoji">🐢</span>
             <code class="ir-cmd__name">/slowmode &lt;duration&gt;</code>
           </div>
-          <p class="ir-cmd__desc">set slowmode on the current channel. Use <code>0s</code> to disable.</p>
+          <p class="ir-cmd__desc">Set slowmode on the current channel. Use <code>0s</code> to disable.</p>
         </div>
 
         <div class="ir-cmd">
@@ -158,7 +173,7 @@
             <span class="ir-cmd__emoji">📋</span>
             <code class="ir-cmd__name">/cases view &lt;member&gt;</code>
           </div>
-          <p class="ir-cmd__desc">view all logged warnings for a member.</p>
+          <p class="ir-cmd__desc">View all logged warnings for a member.</p>
         </div>
 
         <div class="ir-cmd">
@@ -166,16 +181,7 @@
             <span class="ir-cmd__emoji">🗑️</span>
             <code class="ir-cmd__name">/cases clear &lt;member&gt;</code>
           </div>
-          <p class="ir-cmd__desc">clear all warnings for a member.</p>
-        </div>
-
-        
-         <div class="ir-cmd">
-          <div class="ir-cmd__top">
-            <span class="ir-cmd__emoji">🔒</span>
-            <span class="ir-cmd__name ir-cmd__name--text">/userinfo &lt;member&gt;</span>
-          </div>
-          <p class="ir-cmd__desc">view user information, such as date joined, nickname, amount of warnings, etc.</p>
+          <p class="ir-cmd__desc">Clear all warnings for a member.</p>
         </div>
 
         <div class="ir-cmd">
@@ -183,7 +189,7 @@
             <span class="ir-cmd__emoji">🔒</span>
             <span class="ir-cmd__name ir-cmd__name--text">thread closing</span>
           </div>
-          <p class="ir-cmd__desc">add the close tag to any forum thread to trigger the close flow — the bot will ask for a reason, notify the thread owner, then archive and lock it.</p>
+          <p class="ir-cmd__desc">Add the close tag to any forum thread to trigger the close flow — the bot will ask for a reason, notify the thread owner, then archive and lock it.</p>
         </div>
       </div>
 
@@ -196,7 +202,7 @@
             <span class="ir-cmd__emoji">🏠</span>
             <code class="ir-cmd__name">/serverinfo</code>
           </div>
-          <p class="ir-cmd__desc">see stats about the server like member count, boost level, and creation date.</p>
+          <p class="ir-cmd__desc">See stats about the server like member count, boost level, and creation date.</p>
         </div>
 
         <div class="ir-cmd">
@@ -212,7 +218,7 @@
             <span class="ir-cmd__emoji">📊</span>
             <code class="ir-cmd__name">/poll &lt;question&gt; [options]</code>
           </div>
-          <p class="ir-cmd__desc">create a quick yes/no poll, or pass comma-separated options for a multi-choice vote.</p>
+          <p class="ir-cmd__desc">Create a quick Yes/No poll, or pass comma-separated options for a multi-choice vote.</p>
         </div>
 
         <div class="ir-cmd">
@@ -220,7 +226,7 @@
             <span class="ir-cmd__emoji">🎫</span>
             <code class="ir-cmd__name">/ticket open [reason]</code>
           </div>
-          <p class="ir-cmd__desc">open a private support ticket with the mod team.</p>
+          <p class="ir-cmd__desc">Open a private support ticket with the mod team.</p>
         </div>
 
         <div class="ir-cmd">
@@ -228,7 +234,7 @@
             <span class="ir-cmd__emoji">🔒</span>
             <code class="ir-cmd__name">/ticket close</code>
           </div>
-          <p class="ir-cmd__desc">close your support ticket once your issue is resolved.</p>
+          <p class="ir-cmd__desc">Close your support ticket once your issue is resolved.</p>
         </div>
       </div>
     </section>
@@ -238,7 +244,7 @@
     ================================================ -->
     <section class="ir-cta">
       <h2 class="ir-cta__title">ready to add infaRED<span class="dot ir-dot--red">.</span></h2>
-      <a href="https://discord.com/oauth2/authorize?client_id=1520789668109615234&permissions=8&integration_type=0&scope=bot" class="btn btn--primary" target="_blank" rel="noopener">add to discord →</a>
+      <a href="https://discord.gg/nvfZEFQKXy" class="btn btn--primary" target="_blank" rel="noopener">add to discord →</a>
     </section>
 
   </main>
@@ -256,6 +262,7 @@
   </footer>
 
   <script src="grid.js"></script>
+  <script src="reviews.js"></script>
 
 </body>
 </html>
