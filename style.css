@@ -318,6 +318,16 @@ main > section {
   margin: 0;
 }
 
+.game-card__title-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.game-card__title-link:hover {
+  color: var(--violet);
+}
+
 .tag {
   font-family: var(--font-mono);
   font-size: 0.65rem;
