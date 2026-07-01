@@ -370,6 +370,15 @@
 .ir-reviews__logout {
   font-size: 0.78rem;
   padding: 6px 12px;
+  border-color: rgba(255, 60, 60, 0.4);
+  color: var(--red);
+}
+
+.ir-reviews__logout:hover,
+.ir-reviews__logout:focus-visible {
+  background: var(--red-dim);
+  border-color: var(--red);
+  color: var(--white-soft);
 }
 
 .ir-reviews__already {
