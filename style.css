@@ -1,520 +1,175 @@
 /* ============================================
-   ultraviolet. — design tokens
+   devlog.js — skrate devlog
+   Posts are public — load immediately.
+   Compose form only shows for whitelisted devs.
    ============================================ */
 
-:root {
-  /* color */
-  --black:        #000000;
-  --white-soft:   #f6f6f6;
-  --violet:       #cb4fff;
-  --violet-deep:  #8a2be8;
-  --surface:      #111114;
-  --surface-2:    #1a1a1f;
-  --line:         rgba(246, 246, 246, 0.10);
-  --line-bright:  rgba(246, 246, 246, 0.22);
-  --text-dim:     rgba(246, 246, 246, 0.62);
-  --text-faint:   rgba(246, 246, 246, 0.38);
-
-  /* type */
-  --font-display: Cambria, 'Hoefler Text', Georgia, serif;
-  --font-body:    'Inter', system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
-
-  /* layout */
-  --max-w: 1080px;
-  --pad: clamp(20px, 5vw, 64px);
-}
-
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--black);
-  color: var(--white-soft);
-  font-family: var(--font-body);
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html, body { scroll-behavior: auto; }
-}
-
-::selection {
-  background: var(--violet);
-  color: var(--black);
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.dot {
-  color: var(--violet);
-}
-
-/* ============================================
-   background canvas + film grain
-   ============================================ */
-
-#grid {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 0;
-  background: var(--black);
-}
-
-.noise {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-main, header, footer {
-  position: relative;
-  z-index: 2;
-}
-
-/* ============================================
-   nav
-   ============================================ */
-
-.nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px var(--pad);
-  backdrop-filter: blur(6px);
-  background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
-}
-
-.nav__mark {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  letter-spacing: 0.01em;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.nav__glyph {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.nav__links {
-  display: flex;
-  gap: 32px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.nav__links a {
-  color: var(--text-dim);
-  transition: color 0.2s ease;
-  position: relative;
-}
-
-.nav__links a:hover,
-.nav__links a:focus-visible {
-  color: var(--white-soft);
-}
-
-.nav__links a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 0;
-  height: 1px;
-  background: var(--violet);
-  transition: width 0.25s ease;
-}
-
-.nav__links a:hover::after,
-.nav__links a:focus-visible::after {
-  width: 100%;
-}
-
-/* ============================================
-   hero
-   ============================================ */
-
-.hero {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 var(--pad);
-}
-
-.hero__inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  margin: 0 0 20px;
-}
-
-.hero__mark {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(3.2rem, 12vw, 8rem);
-  line-height: 1;
-  margin: 0;
-  background: linear-gradient(120deg, var(--white-soft) 0%, var(--white-soft) 35%, var(--violet) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -0.01em;
-}
-
-.hero__line {
-  margin: 22px 0 48px;
-  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
-  color: var(--text-dim);
-  font-weight: 400;
-}
-
-.hero__scroll {
-  display: inline-block;
-  animation: bob 2.4s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero__scroll { animation: none; }
-}
-
-.hero__chevron {
-  width: 22px;
-  height: 22px;
-  color: var(--text-dim);
-  opacity: 0.7;
-  transition: opacity 0.2s ease, color 0.2s ease;
-}
-
-.hero__scroll:hover .hero__chevron,
-.hero__scroll:focus-visible .hero__chevron {
-  opacity: 1;
-  color: var(--violet);
-}
-
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
-}
-
-/* ============================================
-   section scaffolding
-   ============================================ */
-
-main > section {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 120px var(--pad);
-}
-
-.section-label {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  color: var(--violet);
-  margin: 0 0 40px;
-}
-
-/* ============================================
-   games
-   ============================================ */
-
-.games {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.game-card {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 36px;
-  align-items: center;
-  padding: 32px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  background: linear-gradient(160deg, rgba(255,255,255,0.025), transparent 60%);
-  transition: border-color 0.3s ease, transform 0.3s ease;
-}
-
-.game-card:hover {
-  border-color: var(--line-bright);
-  transform: translateY(-2px);
-}
-
-.game-card__art {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 4px;
-  background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid var(--line);
-}
-
-.game-card__art img {
-  width: 60%;
-  height: 60%;
-  object-fit: contain;
-  filter: drop-shadow(0 0 24px rgba(203, 79, 255, 0.18));
-}
-
-.game-card--featured .game-card__art img {
-  filter: drop-shadow(0 0 24px rgba(255, 60, 60, 0.18));
-}
-
-.game-card__art--empty {
-  background: var(--surface);
-}
-
-.next-mark {
-  font-family: var(--font-display);
-  font-size: 2.5rem;
-  color: var(--text-faint);
-}
-
-.game-card__top {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 12px;
-}
-
-.game-card__top h2 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.7rem;
-  margin: 0;
-}
-
-.game-card__title-link {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.game-card__title-link:hover {
-  color: var(--violet);
-}
-
-.tag {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 100px;
-  border: 1px solid var(--line-bright);
-}
-
-.tag--live {
-  color: #7CFFB2;
-  border-color: rgba(124, 255, 178, 0.3);
-  background: rgba(124, 255, 178, 0.06);
-}
-
-.tag--dev {
-  color: var(--text-faint);
-}
-
-.game-card__desc {
-  color: var(--text-dim);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 0 0 20px;
-  max-width: 480px;
-}
-
-.btn {
-  display: inline-block;
-  font-size: 0.85rem;
-  font-weight: 500;
-  padding: 10px 18px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.btn--ghost {
-  border: 1px solid var(--line-bright);
-  color: var(--white-soft);
-}
-
-.btn--ghost:hover,
-.btn--ghost:focus-visible {
-  border-color: var(--violet);
-  background: rgba(203, 79, 255, 0.08);
-}
-
-/* ============================================
-   studio
-   ============================================ */
-
-.studio__statement {
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
-  line-height: 1.65;
-  color: var(--white-soft);
-  max-width: 640px;
-  font-weight: 400;
-}
-
-/* ============================================
-   footer
-   ============================================ */
-
-.footer {
-  border-top: 1px solid var(--line);
-  padding: 36px var(--pad) 48px;
-  max-width: var(--max-w);
-  margin: 0 auto;
-}
-
-.footer__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.footer__mark {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  color: var(--text-dim);
-}
-
-.footer__links {
-  display: flex;
-  gap: 24px;
-  font-size: 0.85rem;
-}
-
-.footer__links a {
-  color: var(--text-dim);
-  transition: color 0.2s ease;
-}
-
-.footer__links a:hover,
-.footer__links a:focus-visible {
-  color: var(--violet);
-}
-
-.footer__fine {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--text-faint);
-  margin: 0;
-}
-
-.footer__dev {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-}
-
-.footer__dev-name {
-  color: var(--text-faint);
-}
-
-.footer__dev-btn {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  background: transparent;
-  border: 1px solid var(--line-bright);
-  border-radius: 100px;
-  padding: 4px 12px;
-  cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease;
-}
-
-.footer__dev-btn:hover {
-  color: var(--violet);
-  border-color: var(--violet);
-}
-
-/* ============================================
-   focus states (accessibility floor)
-   ============================================ */
-
-a:focus-visible,
-button:focus-visible {
-  outline: 1px solid var(--violet);
-  outline-offset: 3px;
-}
-
-/* ============================================
-   responsive
-   ============================================ */
-
-@media (max-width: 720px) {
-  .nav__links {
-    gap: 18px;
-    font-size: 0.78rem;
+(function () {
+  const composeEl   = document.getElementById('dl-compose');
+  const composeUser = document.getElementById('dl-compose-user');
+  const titleInput  = document.getElementById('dl-title');
+  const bodyInput   = document.getElementById('dl-body');
+  const imagesInput = document.getElementById('dl-images');
+  const submitBtn   = document.getElementById('dl-submit');
+  const errorEl     = document.getElementById('dl-error');
+  const listEl      = document.getElementById('dl-posts-list');
+
+  // posts are public — load immediately without waiting for auth
+  // we just need the supabase client, which is available via the
+  // global created by the inline script in <head>
+  const { createClient } = supabase;
+  const db = createClient(window.SUPABASE_URL, window.SUPABASE_ANON);
+
+  loadPosts();
+
+  // auth-gated UI — run immediately if devAuth is already ready,
+  // otherwise wait for the event from dev-auth.js
+  if (window.devAuth) {
+    setupAuthUI();
+  } else {
+    document.addEventListener('devauth:ready', setupAuthUI);
   }
 
-  main > section {
-    padding: 80px var(--pad);
+  function setupAuthUI() {
+    const { user, isDev } = window.devAuth || {};
+
+    if (isDev && user) {
+      const meta = user.user_metadata;
+      const name = meta.custom_claims?.global_name || meta.full_name || meta.name || 'dev';
+      const avatar = meta.avatar_url
+        ? `<img src="${meta.avatar_url}" alt="" class="ir-review-avatar">`
+        : `<div class="ir-review-avatar ir-review-avatar--placeholder">${name[0]}</div>`;
+      composeUser.innerHTML = `${avatar}<span>${name}</span>`;
+      composeEl.style.display = 'block';
+
+      // only attach submit listener once
+      if (!submitBtn._listenerAdded) {
+        submitBtn._listenerAdded = true;
+        submitBtn.addEventListener('click', handleSubmit);
+      }
+    } else {
+      composeEl.style.display = 'none';
+    }
   }
 
-  .game-card {
-    grid-template-columns: 1fr;
+  async function handleSubmit() {
+    const { user } = window.devAuth || {};
+    if (!user) return;
+
+    errorEl.textContent = '';
+    const title = titleInput.value.trim();
+    const body  = bodyInput.value.trim();
+    const imageUrls = imagesInput.value
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.startsWith('http'));
+
+    if (!title) { errorEl.textContent = 'please add a title.'; return; }
+    if (!body)  { errorEl.textContent = 'please write something.'; return; }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'posting...';
+
+    const meta = user.user_metadata;
+    const { error } = await db.from('posts').insert({
+      user_id:    user.id,
+      username:   meta.custom_claims?.global_name || meta.full_name || meta.name || 'dev',
+      avatar_url: meta.avatar_url || null,
+      title,
+      body,
+      image_urls: imageUrls.length ? imageUrls : null
+    });
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'post update →';
+
+    if (error) {
+      errorEl.textContent = 'something went wrong. try again.';
+      return;
+    }
+
+    titleInput.value = '';
+    bodyInput.value = '';
+    imagesInput.value = '';
+    loadPosts();
   }
 
-  .game-card__art {
-    width: 120px;
-    margin: 0 auto;
+  async function loadPosts() {
+    const { data, error } = await db
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) {
+      listEl.innerHTML = `<p class="dl-posts__empty">couldn't load posts.</p>`;
+      return;
+    }
+
+    if (!data.length) {
+      listEl.innerHTML = `<p class="dl-posts__empty">no updates yet — check back soon.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = data.map(post => {
+      const date = new Date(post.created_at).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      });
+      const avatar = post.avatar_url
+        ? `<img src="${post.avatar_url}" alt="" class="ir-review-avatar">`
+        : `<div class="ir-review-avatar ir-review-avatar--placeholder">${(post.username || '?')[0]}</div>`;
+      const isOwn = window.devAuth?.user?.id === post.user_id;
+      const images = (post.image_urls || []).map(url =>
+        `<figure class="dl-post__img-wrap">
+          <img src="${escHtml(url)}" alt="" class="dl-post__img" loading="lazy">
+        </figure>`
+      ).join('');
+
+      return `
+        <article class="dl-post" data-id="${post.id}">
+          <header class="dl-post__header">
+            <div class="dl-post__author">
+              ${avatar}
+              <div class="dl-post__meta">
+                <span class="dl-post__name">${escHtml(post.username || 'dev')}</span>
+                <time class="dl-post__date">${date}</time>
+              </div>
+            </div>
+            ${isOwn ? `<button class="dl-post__delete" data-id="${post.id}" title="delete post">✕</button>` : ''}
+          </header>
+          <h2 class="dl-post__title">${escHtml(post.title)}</h2>
+          <div class="dl-post__body">${formatBody(post.body)}</div>
+          ${images ? `<div class="dl-post__images">${images}</div>` : ''}
+        </article>`;
+    }).join('');
+
+    listEl.querySelectorAll('.dl-post__delete').forEach(btn => {
+      btn.addEventListener('click', () => deletePost(btn.dataset.id));
+    });
   }
 
-  .game-card__body {
-    text-align: center;
+  async function deletePost(id) {
+    const { user } = window.devAuth || {};
+    if (!user) return;
+    if (!confirm('delete this post?')) return;
+    await db.from('posts').delete().eq('id', id).eq('user_id', user.id);
+    loadPosts();
   }
 
-  .game-card__top {
-    justify-content: center;
+  function formatBody(text) {
+    return text
+      .split(/\n\n+/)
+      .map(p => `<p>${escHtml(p.trim()).replace(/\n/g, '<br>')}</p>`)
+      .join('');
   }
 
-  .game-card__desc {
-    margin-left: auto;
-    margin-right: auto;
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
   }
 
-  .footer__row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
+  // re-run auth UI if auth state changes after initial load
+  document.addEventListener('devauth:ready', setupAuthUI);
+})();
