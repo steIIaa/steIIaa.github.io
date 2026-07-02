@@ -1,7 +1,7 @@
 /* ============================================
    devlog.js — skrate devlog
-   Shows posts to everyone, shows compose form
-   only to whitelisted devs via dev-auth.js.
+   Posts are public — load immediately.
+   Compose form only shows for whitelisted devs.
    ============================================ */
 
 (function () {
@@ -14,11 +14,24 @@
   const errorEl     = document.getElementById('dl-error');
   const listEl      = document.getElementById('dl-posts-list');
 
-  // wait for dev-auth.js to finish before checking permissions
-  document.addEventListener('devauth:ready', onAuthReady);
+  // posts are public — load immediately without waiting for auth
+  // we just need the supabase client, which is available via the
+  // global created by the inline script in <head>
+  const { createClient } = supabase;
+  const db = createClient(window.SUPABASE_URL, window.SUPABASE_ANON);
 
-  function onAuthReady() {
-    const { user, isDev, db } = window.devAuth;
+  loadPosts();
+
+  // auth-gated UI — run immediately if devAuth is already ready,
+  // otherwise wait for the event from dev-auth.js
+  if (window.devAuth) {
+    setupAuthUI();
+  } else {
+    document.addEventListener('devauth:ready', setupAuthUI);
+  }
+
+  function setupAuthUI() {
+    const { user, isDev } = window.devAuth || {};
 
     if (isDev && user) {
       const meta = user.user_metadata;
@@ -28,54 +41,60 @@
         : `<div class="ir-review-avatar ir-review-avatar--placeholder">${name[0]}</div>`;
       composeUser.innerHTML = `${avatar}<span>${name}</span>`;
       composeEl.style.display = 'block';
+
+      // only attach submit listener once
+      if (!submitBtn._listenerAdded) {
+        submitBtn._listenerAdded = true;
+        submitBtn.addEventListener('click', handleSubmit);
+      }
     } else {
       composeEl.style.display = 'none';
     }
+  }
 
-    loadPosts();
+  async function handleSubmit() {
+    const { user } = window.devAuth || {};
+    if (!user) return;
 
-    submitBtn.addEventListener('click', async () => {
-      errorEl.textContent = '';
-      const title = titleInput.value.trim();
-      const body  = bodyInput.value.trim();
-      const imageUrls = imagesInput.value
-        .split('\n')
-        .map(s => s.trim())
-        .filter(s => s.startsWith('http'));
+    errorEl.textContent = '';
+    const title = titleInput.value.trim();
+    const body  = bodyInput.value.trim();
+    const imageUrls = imagesInput.value
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.startsWith('http'));
 
-      if (!title) { errorEl.textContent = 'please add a title.'; return; }
-      if (!body)  { errorEl.textContent = 'please write something.'; return; }
+    if (!title) { errorEl.textContent = 'please add a title.'; return; }
+    if (!body)  { errorEl.textContent = 'please write something.'; return; }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'posting...';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'posting...';
 
-      const meta = user.user_metadata;
-      const { error } = await db.from('posts').insert({
-        user_id:    user.id,
-        username:   meta.custom_claims?.global_name || meta.full_name || meta.name || 'dev',
-        avatar_url: meta.avatar_url || null,
-        title,
-        body,
-        image_urls: imageUrls.length ? imageUrls : null
-      });
-
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'post update →';
-
-      if (error) {
-        errorEl.textContent = 'something went wrong. try again.';
-        return;
-      }
-
-      titleInput.value = '';
-      bodyInput.value = '';
-      imagesInput.value = '';
-      loadPosts();
+    const meta = user.user_metadata;
+    const { error } = await db.from('posts').insert({
+      user_id:    user.id,
+      username:   meta.custom_claims?.global_name || meta.full_name || meta.name || 'dev',
+      avatar_url: meta.avatar_url || null,
+      title,
+      body,
+      image_urls: imageUrls.length ? imageUrls : null
     });
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'post update →';
+
+    if (error) {
+      errorEl.textContent = 'something went wrong. try again.';
+      return;
+    }
+
+    titleInput.value = '';
+    bodyInput.value = '';
+    imagesInput.value = '';
+    loadPosts();
   }
 
   async function loadPosts() {
-    const { db } = window.devAuth;
     const { data, error } = await db
       .from('posts')
       .select('*')
@@ -98,7 +117,7 @@
       const avatar = post.avatar_url
         ? `<img src="${post.avatar_url}" alt="" class="ir-review-avatar">`
         : `<div class="ir-review-avatar ir-review-avatar--placeholder">${(post.username || '?')[0]}</div>`;
-      const isOwn = window.devAuth.user?.id === post.user_id;
+      const isOwn = window.devAuth?.user?.id === post.user_id;
       const images = (post.image_urls || []).map(url =>
         `<figure class="dl-post__img-wrap">
           <img src="${escHtml(url)}" alt="" class="dl-post__img" loading="lazy">
@@ -129,14 +148,13 @@
   }
 
   async function deletePost(id) {
-    const { db, user } = window.devAuth;
+    const { user } = window.devAuth || {};
     if (!user) return;
     if (!confirm('delete this post?')) return;
     await db.from('posts').delete().eq('id', id).eq('user_id', user.id);
     loadPosts();
   }
 
-  // turns newlines into paragraphs
   function formatBody(text) {
     return text
       .split(/\n\n+/)
@@ -151,4 +169,7 @@
       .replace(/>/g,'&gt;')
       .replace(/"/g,'&quot;');
   }
+
+  // re-run auth UI if auth state changes after initial load
+  document.addEventListener('devauth:ready', setupAuthUI);
 })();
