@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ultraviolet. — game design &amp; development</title>
+<meta name="description" content="ultraviolet. is a small game studio building strange, sharp little worlds.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- grain / scanline overlay -->
+<div class="overlay-grain" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="#top" class="logo">ultraviolet<span class="logo-dot">.</span></a>
+
+    <nav class="main-nav" id="mainNav">
+      <a href="#top" class="nav-link is-active">Home</a>
+      <a href="#about" class="nav-link">About</a>
+      <a href="#games" class="nav-link">Games</a>
+      <a href="#craft" class="nav-link">Craft</a>
+      <a href="#journey" class="nav-link">Journey</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">
+        <span class="menu-bars"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ TOOLS STRIP ============ -->
+  <div class="tools-strip">
+    <div class="wrap tools-strip-inner">
+      <span class="tools-label">Built &amp; shipped with</span>
+      <ul class="tools-list">
+        <li>Unity</li>
+        <li>Godot</li>
+        <li>Unreal</li>
+        <li>Blender</li>
+        <li>Aseprite</li>
+        <li>Steam</li>
+        <li>itch.io</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+
+      <div class="hero-copy" data-reveal>
+        <p class="eyebrow"><span class="eyebrow-rule"></span>Game design &amp; development</p>
+        <h1 class="hero-title">
+          <span class="hero-title-line">ultra&shy;violet</span><span class="hero-title-dot">.</span>
+        </h1>
+        <p class="hero-lede">
+          A small studio, one desk, too many prototypes. I design and build
+          games with sharp rules and stranger logic than the real one —
+          then spend far too long on the game-feel nobody will consciously notice.
+        </p>
+
+        <div class="hero-contact">
+          <p><span>P</span> — <a href="tel:+00000000000">+00 (0) 00 00 00 00</a></p>
+          <p><span>E</span> — <a href="mailto:hello@ultraviolet.games">hello@ultraviolet.games</a></p>
+        </div>
+
+        <div class="social-row">
+          <a href="#" aria-label="ultraviolet. on itch.io">itch</a>
+          <a href="#" aria-label="ultraviolet. on Twitter/X">x</a>
+          <a href="#" aria-label="ultraviolet. on Bluesky">bsky</a>
+          <a href="#" aria-label="ultraviolet. on GitHub">gh</a>
+        </div>
+      </div>
+
+      <div class="hero-visual" data-reveal>
+        <div class="cartridge" id="cartridge">
+          <div class="cartridge-notch"></div>
+          <div class="cartridge-screen">
+            <canvas id="heroCanvas"></canvas>
+            <div class="scanlines" aria-hidden="true"></div>
+          </div>
+          <div class="cartridge-label">
+            <span class="cartridge-label-title">UV—01</span>
+            <span class="cartridge-label-sub">signal test / no rom loaded</span>
+          </div>
+        </div>
+
+        <div class="hero-shape hero-shape-tri" aria-hidden="true"></div>
+        <div class="hero-shape hero-shape-dot" aria-hidden="true"></div>
+        <div class="hero-shape hero-shape-ring" aria-hidden="true"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="section about" id="about">
+    <div class="wrap about-grid">
+
+      <div class="about-left" data-reveal>
+        <p class="eyebrow"><span class="eyebrow-rule"></span>About</p>
+        <h2 class="section-title">
+          Rules are just suggestions<br>until they're fun.
+        </h2>
+        <p class="section-text">
+          Every project starts the same way — a single mechanic, tested until
+          it either breaks or becomes the whole game. I like systems you can
+          hold in your head, worlds small enough to finish and strange enough
+          to remember. Ultraviolet. is that habit with a name on it.
+        </p>
+
+        <div class="stat-row">
+          <div class="stat">
+            <span class="stat-number">06</span>
+            <span class="stat-label">Games<br>shipped</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">03</span>
+            <span class="stat-label">Game jams<br>won</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">∞</span>
+            <span class="stat-label">Prototypes<br>abandoned</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-right" data-reveal>
+        <p class="eyebrow"><span class="eyebrow-rule"></span>Say hello</p>
+        <h2 class="section-title small">Have a project<br>in mind?</h2>
+        <p class="section-text">Let's talk pixels, physics, or publishing.</p>
+        <a class="big-link" href="mailto:hello@ultraviolet.games">
+          hello@ultraviolet.games
+          <span class="big-link-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ GAMES ============ -->
+  <section class="section games" id="games">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="eyebrow-rule"></span>Selected games</p>
+        <h2 class="section-title">Worlds shipped so far.</h2>
+      </div>
+
+      <div class="game-grid">
+
+        <article class="game-card" data-reveal data-seed="neonfall">
+          <div class="game-art"><canvas></canvas></div>
+          <div class="game-info">
+            <h3>Neonfall</h3>
+            <p class="game-meta">Puzzle-platformer · PC · 2023</p>
+            <p class="game-desc">Light only travels where you've already failed.</p>
+          </div>
+        </article>
+
+        <article class="game-card" data-reveal data-seed="glassorchard">
+          <div class="game-art"><canvas></canvas></div>
+          <div class="game-info">
+            <h3>Glass Orchard</h3>
+            <p class="game-meta">Narrative sim · PC / Mac · 2022</p>
+            <p class="game-desc">A farm that remembers every crop you didn't plant.</p>
+          </div>
+        </article>
+
+        <article class="game-card" data-reveal data-seed="staticpilgrim">
+          <div class="game-art"><canvas></canvas></div>
+          <div class="game-info">
+            <h3>Static Pilgrim</h3>
+            <p class="game-meta">Roguelite · PC · 2021</p>
+            <p class="game-desc">Every run rewrites the map's opinion of you.</p>
+          </div>
+        </article>
+
+        <article class="game-card" data-reveal data-seed="hollowsignal">
+          <div class="game-art"><canvas></canvas></div>
+          <div class="game-info">
+            <h3>Hollow Signal</h3>
+            <p class="game-meta">Short horror · PC · 2021</p>
+            <p class="game-desc">A radio that only picks up things behind you.</p>
+          </div>
+        </article>
+
+        <article class="game-card" data-reveal data-seed="papermoon">
+          <div class="game-art"><canvas></canvas></div>
+          <div class="game-info">
+            <h3>Paper Moon EP.</h3>
+            <p class="game-meta">Physics toy · itch.io · 2020</p>
+            <p class="game-desc">Origami gravity, folded wrong on purpose.</p>
+          </div>
+        </article>
+
+        <article class="game-card" data-reveal data-seed="driftwood">
+          <div class="game-art"><canvas></canvas></div>
+          <div class="game-info">
+            <h3>Driftwood</h3>
+            <p class="game-meta">Jam game · 48hr · 2019</p>
+            <p class="game-desc">A boat that only steers when nobody's looking.</p>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CRAFT / SERVICES ============ -->
+  <section class="section craft" id="craft">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="eyebrow-rule"></span>Craft</p>
+        <h2 class="section-title">What I actually do.</h2>
+      </div>
+
+      <div class="craft-grid">
+        <div class="craft-item" data-reveal>
+          <span class="craft-index">01</span>
+          <h3>Game design</h3>
+          <p>Systems, mechanics, and the paper prototypes that come before any of it is fun.</p>
+        </div>
+        <div class="craft-item" data-reveal>
+          <span class="craft-index">02</span>
+          <h3>Engineering</h3>
+          <p>Gameplay code, tools, and the boring pipeline work that makes the fun part possible.</p>
+        </div>
+        <div class="craft-item" data-reveal>
+          <span class="craft-index">03</span>
+          <h3>Pixel &amp; UI art</h3>
+          <p>Sprites, palettes, and interfaces that stay legible at 4x zoom on a bad monitor.</p>
+        </div>
+        <div class="craft-item" data-reveal>
+          <span class="craft-index">04</span>
+          <h3>Sound &amp; feel</h3>
+          <p>Juice, feedback, and the ten milliseconds that decide if a jump feels good.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ JOURNEY ============ -->
+  <section class="section journey" id="journey">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="eyebrow"><span class="eyebrow-rule"></span>Journey</p>
+        <h2 class="section-title">How the studio got here.</h2>
+      </div>
+
+      <ol class="timeline">
+        <li class="timeline-item" data-reveal>
+          <span class="timeline-year">2019</span>
+          <div class="timeline-body">
+            <h3>First jam, first bug</h3>
+            <p>Made Driftwood in a weekend and learned that "just ship it" is a design philosophy.</p>
+          </div>
+        </li>
+        <li class="timeline-item" data-reveal>
+          <span class="timeline-year">2021</span>
+          <div class="timeline-body">
+            <h3>Studio gets a name</h3>
+            <p>Ultraviolet. becomes the banner for everything after Static Pilgrim's surprise release.</p>
+          </div>
+        </li>
+        <li class="timeline-item" data-reveal>
+          <span class="timeline-year">2022</span>
+          <div class="timeline-body">
+            <h3>First narrative game</h3>
+            <p>Glass Orchard — the first project built around a feeling instead of a mechanic.</p>
+          </div>
+        </li>
+        <li class="timeline-item" data-reveal>
+          <span class="timeline-year">2023</span>
+          <div class="timeline-body">
+            <h3>Neonfall ships</h3>
+            <p>The biggest project yet, and the first one with a wishlist page before a prototype.</p>
+          </div>
+        </li>
+        <li class="timeline-item" data-reveal>
+          <span class="timeline-year">Now</span>
+          <div class="timeline-body">
+            <h3>Next thing, unannounced</h3>
+            <p>Currently prototyping. Ask nicely and I might show you a build.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT / CTA ============ -->
+  <section class="section contact" id="contact">
+    <div class="wrap contact-inner">
+      <p class="eyebrow"><span class="eyebrow-rule"></span>Contact</p>
+      <h2 class="contact-title">Got a build<br>you want made?</h2>
+      <a class="big-link big-link-xl" href="mailto:hello@ultraviolet.games">
+        hello@ultraviolet.games
+        <span class="big-link-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <a href="#top" class="logo logo-small">ultraviolet<span class="logo-dot">.</span></a>
+    <p class="footer-note">Built without a single stock photo. &copy; <span id="year"></span> ultraviolet.</p>
+    <a href="#top" class="back-to-top">Back to top ↑</a>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>
